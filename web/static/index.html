@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>CyberRange Platform</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script src="index.js" defer></script>
+	</head>
+	<body
+		class="bg-slate-900 text-slate-100 font-sans min-h-screen flex items-center justify-center p-4"
+	>
+		<!-- ========================================== -->
+		<!-- SCREEN 1: AUTH                           -->
+		<!-- ========================================== -->
+		<div
+			id="auth-screen"
+			class="screen w-full max-w-md bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-8"
+		>
+			<div class="flex items-center justify-center mb-6">
+				<div
+					class="h-10 w-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-xl mr-3"
+				>
+					C
+				</div>
+				<h1 class="text-2xl font-bold tracking-tight">CyberRange</h1>
+			</div>
+			<div class="space-y-4">
+				<div>
+					<label class="block text-sm font-medium text-slate-400 mb-1"
+						>Email</label
+					>
+					<input
+						type="email"
+						id="email"
+						class="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-100 placeholder-slate-500"
+						placeholder="operator@company.com"
+					/>
+				</div>
+				<div>
+					<label class="block text-sm font-medium text-slate-400 mb-1"
+						>Password</label
+					>
+					<input
+						type="password"
+						id="password"
+						class="w-full px-4 py-2.5 bg-slate-900 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-100 placeholder-slate-500"
+						placeholder="••••••••"
+					/>
+				</div>
+				<button
+					onclick="login()"
+					class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
+				>
+					Access Platform
+				</button>
+				<div class="text-center">
+					<button
+						onclick="register()"
+						class="text-sm text-slate-400 hover:text-indigo-400 transition-colors"
+					>
+						Don't have an account?
+						<span class="font-medium underline">Register</span>
+					</button>
+				</div>
+			</div>
+			<div id="auth-msg" class="mt-4"></div>
+		</div>
+
+		<!-- ========================================== -->
+		<!-- SCREEN 2: DASHBOARD (TEAMS)              -->
+		<!-- ========================================== -->
+		<div
+			id="dashboard-screen"
+			class="screen hidden w-full max-w-md bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-8"
+		>
+			<h2 class="text-xl font-bold mb-6">Team Operations</h2>
+
+			<!-- SECTION A: Create / Join (Hidden once in a team) -->
+			<div id="create-join-section">
+				<div
+					class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 mb-6"
+				>
+					<h3 class="font-medium text-slate-300 mb-3">Create New Team</h3>
+					<input
+						type="text"
+						id="team-name"
+						class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-100 placeholder-slate-500 mb-3"
+						placeholder="e.g. Red Team Alpha"
+					/>
+					<button
+						onclick="createTeam()"
+						class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors"
+					>
+						Initialize Team
+					</button>
+				</div>
+				<div class="flex items-center gap-4 mb-6">
+					<div class="flex-grow h-px bg-slate-700"></div>
+					<span class="text-slate-500 text-sm">OR</span>
+					<div class="flex-grow h-px bg-slate-700"></div>
+				</div>
+				<div>
+					<h3 class="font-medium text-slate-300 mb-3">Join Existing Team</h3>
+					<input
+						type="text"
+						id="join-team-id"
+						class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-100 placeholder-slate-500 mb-3 font-mono text-sm"
+						placeholder="Paste Team UUID here"
+					/>
+					<button
+						onclick="joinTeam()"
+						class="w-full py-2 border border-slate-600 hover:bg-slate-700 text-slate-300 font-medium rounded-lg transition-colors"
+					>
+						Request Access
+					</button>
+				</div>
+			</div>
+
+			<!-- SECTION B: Team Info (Hidden until in a team) -->
+			<div id="invite-section" class="hidden">
+				<!-- Invite Code (Hidden from Attackers) -->
+				<div
+					id="invite-code-box"
+					class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 mb-6"
+				>
+					<label class="block text-sm font-medium text-slate-400 mb-2"
+						>Team Invite Code</label
+					>
+					<div class="flex gap-2">
+						<input
+							type="text"
+							id="invite-code"
+							readonly
+							class="flex-grow px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-slate-400 font-mono text-xs"
+						/>
+						<button
+							id="copy-btn"
+							onclick="copyInvite()"
+							class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium rounded-lg transition-colors text-sm"
+						>
+							Copy
+						</button>
+					</div>
+				</div>
+
+				<!-- Members List -->
+				<h3 class="font-medium text-slate-300 mb-3">Active Members</h3>
+				<ul id="member-list" class="space-y-2 mb-6 text-sm text-slate-400"></ul>
+
+				<!-- Action Buttons (Outside the invite box!) -->
+				<button
+					id="start-game-btn"
+					class="hidden w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
+				>
+					Proceed to Scenario
+				</button>
+
+				<p id="wait-msg" class="hidden text-sm text-slate-500 text-center mt-3">
+					Waiting for Team Captain to start the game...
+				</p>
+
+				<button
+					id="refresh-btn"
+					class="hidden w-full mt-4 py-2 border border-slate-600 hover:bg-slate-700 text-slate-300 font-medium rounded-lg transition-colors text-sm"
+					onclick="checkGameStatus()"
+				>
+					Refresh Status
+				</button>
+			</div>
+
+			<div id="team-msg" class="mt-4"></div>
+		</div>
+
+		<!-- ========================================== -->
+		<!-- SCREEN 3: THE GAME                      -->
+		<!-- ========================================== -->
+		<div
+			id="game-screen"
+			class="screen hidden w-full max-w-md bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl p-8"
+		>
+			<div class="flex justify-between items-start mb-6">
+				<div>
+					<h2 class="text-xl font-bold">Beginner Linux Recon</h2>
+					<p class="text-slate-400 text-sm mt-1">
+						T1046 - Network Service Discovery
+					</p>
+				</div>
+				<span
+					class="px-3 py-1 bg-slate-700 text-slate-300 text-xs font-mono rounded-full"
+					>EASY</span
+				>
+			</div>
+
+			<button
+				id="deploy-btn"
+				onclick="startSession()"
+				class="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-lg transition-colors duration-200 shadow-lg shadow-rose-500/20 mb-6"
+			>
+				Deploy Container
+			</button>
+
+			<div
+				id="active-session"
+				class="hidden bg-slate-900/50 p-4 rounded-xl border border-emerald-500/30"
+			>
+				<div class="flex items-center text-emerald-400 mb-4">
+					<div
+						class="h-2 w-2 bg-emerald-400 rounded-full mr-2 animate-pulse"
+					></div>
+					<span class="text-sm font-medium">Environment Live</span>
+				</div>
+				<label class="block text-sm font-medium text-slate-400 mb-1"
+					>Submit Flag</label
+				>
+				<div class="flex gap-2">
+					<input
+						type="text"
+						id="flag-input"
+						class="flex-grow px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-100 placeholder-slate-500 font-mono"
+						placeholder="FLAG{...}"
+					/>
+					<button
+						onclick="submitFlag()"
+						class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition-colors"
+					>
+						Submit
+					</button>
+				</div>
+			</div>
+			<div id="game-msg" class="mt-4"></div>
+		</div>
+	</body>
+</html>
