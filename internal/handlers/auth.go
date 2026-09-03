@@ -6,12 +6,12 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthHandler struct {
-    Conn *pgx.Conn
+    Conn *pgxpool.Pool
 }
 
 type RegisterRequest struct {

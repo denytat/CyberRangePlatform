@@ -6,11 +6,11 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type TeamHandler struct {
-    Conn *pgx.Conn
+    Conn *pgxpool.Pool
 }
 
 type CreateTeamRequest struct {

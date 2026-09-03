@@ -40,3 +40,17 @@ func StartContainer(imageName string) (string, error) {
 
     return resp.ID, nil
 }
+
+func StopContainer(containerID string) error {
+    cli, err := client.NewClientWithOpts(client.FromEnv)
+    if err != nil {
+        return fmt.Errorf("failed to connect to Docker: %v", err)
+    }
+
+    timeout := 5
+    stopOpts := container.StopOptions{Timeout: &timeout}
+    if err := cli.ContainerStop(context.Background(), containerID, stopOpts); err != nil {
+        return fmt.Errorf("failed to stop container: %v", err)
+    }
+    return nil
+}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
 
@@ -12,7 +11,7 @@ import (
 func main() {
     // 1. Connect to Database
     conn := db.Connect()
-    defer conn.Close(context.Background())
+    defer conn.Close()
 
     // 2. Initialize Handlers
     authHandler := &handlers.AuthHandler{Conn: conn}

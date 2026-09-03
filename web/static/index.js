@@ -3,6 +3,9 @@ let teamId = ""
 let myRole = ""
 let scenarioId = "550e8400-e29b-41d4-a716-446655440000"
 let sessionId = ""
+let gameEnded = false
+let inGame = false
+let pollTimer = null
 
 function showScreen(screenId) {
 	document.querySelectorAll(".screen").forEach(el => el.classList.add("hidden"))
@@ -110,23 +113,72 @@ async function setupTeamUI() {
 		document.getElementById("refresh-btn").classList.remove("hidden") // ATTACKER SEES THIS
 	}
 
-	// 3. Load Members
+	await refreshMembers()
+	pollForUpdates()
+}
+
+function renderMembers(members) {
+	const listEl = document.getElementById("member-list")
+	if (!listEl || !Array.isArray(members)) return
+	listEl.innerHTML = ""
+	members.forEach(m => {
+		const li = document.createElement("li")
+		li.className =
+			"flex justify-between items-center p-2 bg-slate-900/50 rounded border border-slate-700"
+		li.innerHTML = `<span class="text-slate-300">${m.email}</span><span class="text-xs font-mono px-2 py-1 rounded ${m.role === "Captain" ? "bg-indigo-500/20 text-indigo-400" : "bg-slate-700 text-slate-400"}">${m.role}</span>`
+		listEl.appendChild(li)
+	})
+}
+
+async function refreshMembers() {
 	const members = await apiCall(
 		`/api/teams/members?team_id=${teamId}&t=${Date.now()}`,
 		null,
 		"GET",
 	)
-	const listEl = document.getElementById("member-list")
-	listEl.innerHTML = ""
-	if (Array.isArray(members)) {
-		members.forEach(m => {
-			const li = document.createElement("li")
-			li.className =
-				"flex justify-between items-center p-2 bg-slate-900/50 rounded border border-slate-700"
-			li.innerHTML = `<span class="text-slate-300">${m.email}</span><span class="text-xs font-mono px-2 py-1 rounded ${m.role === "Captain" ? "bg-indigo-500/20 text-indigo-400" : "bg-slate-700 text-slate-400"}">${m.role}</span>`
-			listEl.appendChild(li)
-		})
+	renderMembers(members)
+}
+
+function schedulePoll() {
+	if (gameEnded) return
+	clearTimeout(pollTimer)
+	pollTimer = setTimeout(pollForUpdates, 3000)
+}
+
+function enterLiveGame(newSessionId) {
+	if (gameEnded) return
+	sessionId = newSessionId
+	const alreadyInGame = inGame
+	inGame = true
+	showScreen("game-screen")
+	document.getElementById("active-session").classList.remove("hidden")
+	if (myRole !== "Captain") {
+		document.getElementById("deploy-btn").classList.add("hidden")
 	}
+	if (!alreadyInGame) {
+		document.getElementById("game-msg").innerText =
+			"Captain deployed the container. Find the flag."
+		document.getElementById("game-msg").className =
+			"text-emerald-400 text-sm text-center mt-4"
+	}
+}
+
+function showWinState(message) {
+	gameEnded = true
+	inGame = true
+	clearTimeout(pollTimer)
+	showScreen("game-screen")
+	document.getElementById("deploy-btn").classList.add("hidden")
+	document.getElementById("active-session").classList.remove("hidden")
+	document.getElementById("flag-input").disabled = true
+	document.getElementById("flag-submit-btn").disabled = true
+	const dot = document.getElementById("env-live-dot")
+	dot.classList.remove("animate-pulse", "bg-emerald-400")
+	dot.classList.add("bg-slate-500")
+	document.getElementById("env-live-label").innerText = "Challenge complete"
+	document.getElementById("game-msg").innerText = message
+	document.getElementById("game-msg").className =
+		"text-emerald-400 text-sm text-center mt-4 font-bold text-lg"
 }
 
 function copyInvite() {
@@ -137,21 +189,27 @@ function copyInvite() {
 }
 
 async function checkGameStatus() {
+	console.log("Checking game status for team:", teamId) // DEBUG 1
 	const session = await apiCall(
 		`/api/sessions/active?team_id=${teamId}&t=${Date.now()}`,
 		null,
 		"GET",
 	)
-	if (session.session_id) {
-		sessionId = session.session_id
-		showScreen("game-screen")
-		document.getElementById("active-session").classList.remove("hidden")
-		document.getElementById("game-msg").innerText =
-			"Captain deployed the container. Find the flag."
-		document.getElementById("game-msg").className =
-			"text-emerald-400 text-sm text-center mt-4"
+
+	console.log("Server replied with:", session) // DEBUG 2
+
+	if (session.status === "completed") {
+		sessionId = session.session_id || sessionId
+		showWinState("A teammate captured the flag. Challenge complete.")
+		return
+	}
+	if (session.session_id && session.status === "running") {
+		enterLiveGame(session.session_id)
 	} else {
-		alert("Captain hasn't started the game yet.")
+		alert(
+			"Captain hasn't started the game yet. Server said: " +
+				JSON.stringify(session),
+		)
 	}
 }
 
@@ -162,8 +220,7 @@ async function startSession() {
 		scenario_id: scenarioId,
 	})
 	if (data.session_id) {
-		sessionId = data.session_id
-		document.getElementById("active-session").classList.remove("hidden")
+		enterLiveGame(data.session_id)
 		msg.innerText = "Environment live. Find the flag."
 		msg.className = "text-emerald-400 text-sm text-center mt-4"
 	} else {
@@ -178,8 +235,34 @@ async function submitFlag() {
 		session_id: sessionId,
 		submitted_flag: document.getElementById("flag-input").value,
 	})
-	msg.innerText = data.message
-	msg.className = data.message.includes("Congratulations")
-		? "text-emerald-400 text-sm text-center mt-4 font-bold text-lg"
-		: "text-red-400 text-sm text-center mt-4"
+	if (data.status === "completed" || (data.message && data.message.includes("Congratulations"))) {
+		showWinState(data.message || "🎉 Congratulations! You found the flag!")
+		return
+	}
+	msg.innerText = data.message || data.error || "❌ Incorrect flag. Keep hacking!"
+	msg.className = "text-red-400 text-sm text-center mt-4"
+}
+
+async function pollForUpdates() {
+	if (!teamId || gameEnded) return
+	try {
+		await refreshMembers()
+		const session = await apiCall(
+			`/api/sessions/active?team_id=${teamId}&t=${Date.now()}`,
+			null,
+			"GET",
+		)
+		if (session.status === "completed") {
+			sessionId = session.session_id || sessionId
+			if (!gameEnded) {
+				showWinState("A teammate captured the flag. Challenge complete.")
+			}
+			return
+		}
+		if (session.session_id && session.status === "running") {
+			enterLiveGame(session.session_id)
+		}
+	} finally {
+		schedulePoll()
+	}
 }

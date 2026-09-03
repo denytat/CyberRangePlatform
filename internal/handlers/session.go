@@ -4,15 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/romanButkus/cyberrange/internal/docker"
 )
 
 type SessionHandler struct {
-    Conn *pgx.Conn
+    Conn *pgxpool.Pool
 }
 
 type StartSessionRequest struct {
@@ -90,50 +92,58 @@ func (h *SessionHandler) SubmitFlag(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    // 1. Find out which scenario this session is playing
-    var scenarioID string
-    err := h.Conn.QueryRow(context.Background(), 
-        "SELECT scenario_id FROM sessions WHERE id = $1", 
-        req.SessionID,
-    ).Scan(&scenarioID)
+    w.Header().Set("Content-Type", "application/json")
 
+    var scenarioID string
+    var containerID *string
+    err := h.Conn.QueryRow(context.Background(),
+        "SELECT scenario_id, container_id FROM sessions WHERE id = $1",
+        req.SessionID,
+    ).Scan(&scenarioID, &containerID)
     if err != nil {
-        http.Error(w, "Session not found", http.StatusNotFound)
+        if err == pgx.ErrNoRows {
+            w.WriteHeader(http.StatusNotFound)
+            json.NewEncoder(w).Encode(map[string]string{"message": "Session not found", "error": "session_not_found"})
+            return
+        }
+        w.WriteHeader(http.StatusInternalServerError)
+        json.NewEncoder(w).Encode(map[string]string{"message": "Failed to load session", "error": err.Error()})
         return
     }
 
-    // 2. Get the real flag for that scenario
     var realFlag string
-    err = h.Conn.QueryRow(context.Background(), 
-        "SELECT flag FROM scenarios WHERE id = $1", 
+    err = h.Conn.QueryRow(context.Background(),
+        "SELECT flag FROM scenarios WHERE id = $1",
         scenarioID,
     ).Scan(&realFlag)
-
     if err != nil {
-        http.Error(w, "Scenario not found", http.StatusNotFound)
+        w.WriteHeader(http.StatusNotFound)
+        json.NewEncoder(w).Encode(map[string]string{"message": "Scenario not found", "error": "scenario_not_found"})
         return
     }
 
-    // 3. Check if they are correct
-    w.Header().Set("Content-Type", "application/json")
-    if req.SubmittedFlag == realFlag {
-        
-        // Update session status to completed!
-        h.Conn.Exec(context.Background(), 
-            "UPDATE sessions SET status = 'completed' WHERE id = $1", 
+    submitted := strings.TrimSpace(req.SubmittedFlag)
+    expected := strings.TrimSpace(realFlag)
+    if submitted == expected {
+        h.Conn.Exec(context.Background(),
+            "UPDATE sessions SET status = 'completed' WHERE id = $1",
             req.SessionID,
         )
+        if containerID != nil && *containerID != "" {
+            _ = docker.StopContainer(*containerID)
+        }
 
-        w.WriteHeader(http.StatusOK)
         json.NewEncoder(w).Encode(map[string]string{
             "message": "🎉 Congratulations! You found the flag!",
+            "status":  "completed",
         })
-    } else {
-        w.WriteHeader(http.StatusUnauthorized)
-        json.NewEncoder(w).Encode(map[string]string{
-            "message": "❌ Incorrect flag. Keep hacking!",
-        })
+        return
     }
+
+    json.NewEncoder(w).Encode(map[string]string{
+        "message": "❌ Incorrect flag. Keep hacking!",
+        "status":  "running",
+    })
 }
 
 func (h *SessionHandler) GetActiveSession(w http.ResponseWriter, r *http.Request) {
@@ -143,24 +153,30 @@ func (h *SessionHandler) GetActiveSession(w http.ResponseWriter, r *http.Request
         return
     }
 
-    var sessionID, containerID string
-    // Check if there is a running session for this team
-    err := h.Conn.QueryRow(context.Background(), 
-        "SELECT id, container_id FROM sessions WHERE team_id = $1 AND status = 'running' LIMIT 1", 
+    var sessionID, status string
+    var containerID *string
+    err := h.Conn.QueryRow(context.Background(),
+        `SELECT id, container_id, status FROM sessions
+         WHERE team_id = $1
+         ORDER BY CASE WHEN status = 'running' THEN 0 ELSE 1 END, expires_at DESC
+         LIMIT 1`,
         teamID,
-    ).Scan(&sessionID, &containerID)
+    ).Scan(&sessionID, &containerID, &status)
 
     if err != nil {
-        // No active game found
         w.Header().Set("Content-Type", "application/json")
         json.NewEncoder(w).Encode(map[string]string{"message": "no_active_session"})
         return
     }
 
-    // Game is active!
+    cid := ""
+    if containerID != nil {
+        cid = *containerID
+    }
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(map[string]string{
         "session_id":   sessionID,
-        "container_id": containerID,
+        "container_id": cid,
+        "status":       status,
     })
 }
