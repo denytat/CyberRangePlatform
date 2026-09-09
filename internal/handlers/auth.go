@@ -81,11 +81,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
     }
 
     // 1. Find the user in the database by email
-    var userID, hashedPassword string
+    var userID, hashedPassword, email string
     err := h.Conn.QueryRow(context.Background(), 
-        "SELECT id, password_hash FROM users WHERE email = $1", 
+        "SELECT id, password_hash, email FROM users WHERE email = $1", 
         req.Email,
-    ).Scan(&userID, &hashedPassword)
+    ).Scan(&userID, &hashedPassword, &email)
 
     if err != nil {
         http.Error(w, "Invalid email or password", http.StatusUnauthorized)
@@ -104,5 +104,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(map[string]string{
         "message": "Login successful",
         "user_id": userID,
+        "email":   email,
     })
 }
