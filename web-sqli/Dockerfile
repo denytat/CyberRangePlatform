@@ -11,7 +11,7 @@ CREATE TABLE users (
 );
 
 INSERT INTO users (id, username, password, secret) VALUES
-	(1, 'admin', 'pass', 'FLAG{injection_master}'),
+	(1, 'admin', 'pass', 'CR{injection_master}'),
 	(2, 'guest', 'pass', NULL);
 SQL
 

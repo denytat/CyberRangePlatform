@@ -17,10 +17,12 @@ func main() {
     authHandler := &handlers.AuthHandler{Conn: conn}
     teamHandler := &handlers.TeamHandler{Conn: conn}
     sessionHandler := &handlers.SessionHandler{Conn: conn}
+    terminalHandler := &handlers.TerminalHandler{}
 
     // 3. Create Routes
     mux := http.NewServeMux()
     mux.Handle("/", http.FileServer(http.Dir("./web/static")))
+    mux.HandleFunc("/ws/terminal", terminalHandler.HandleUpgrade)
     mux.HandleFunc("POST /api/register", authHandler.Register)
     mux.HandleFunc("POST /api/login", authHandler.Login)
     mux.HandleFunc("POST /api/teams/create", teamHandler.CreateTeam)
@@ -29,6 +31,7 @@ func main() {
     mux.HandleFunc("POST /api/sessions/start", sessionHandler.Start)
     mux.HandleFunc("POST /api/sessions/submit-flag", sessionHandler.SubmitFlag)
     mux.HandleFunc("GET /api/sessions/active", sessionHandler.GetActiveSession)
+    
 
     // 4. Start Server
     log.Println("🚀 CyberRange API running on http://localhost:8080")

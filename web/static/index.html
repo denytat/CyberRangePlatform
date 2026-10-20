@@ -6,12 +6,12 @@
 		<title>CyberRange Platform</title>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<script src="https://cdn.tailwindcss.com"></script>
 		<link
 			href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Rajdhani:wght@600;700&display=swap"
 			rel="stylesheet"
 		/>
 		<link rel="stylesheet" href="style.css" />
-		<script src="index.js" defer></script>
 	</head>
 	<body>
 		<div id="app-shell">
@@ -20,7 +20,7 @@
 					<a
 						class="brand"
 						href="#"
-						onclick="goHome(event)"
+						data-action="home"
 						aria-label="CyberRange home"
 					>
 						<span class="brand-mark" aria-hidden="true">
@@ -45,42 +45,20 @@
 							href="#"
 							class="nav-link is-active"
 							id="nav-home"
-							onclick="goHome(event)"
+							data-action="home"
 							>Home</a
 						>
-						<a
-							href="#"
-							class="nav-link"
-							id="nav-range"
-							onclick="openAppFromNav(event)"
+						<a href="#" class="nav-link" id="nav-range" data-action="range"
 							>Range</a
 						>
-						<a
-							href="#"
-							class="nav-link"
-							id="nav-teams"
-							onclick="openTeamsFromNav(event)"
+						<a href="#" class="nav-link" id="nav-teams" data-action="teams"
 							>Teams</a
 						>
-						<a
-							href="#"
-							class="nav-link"
-							id="nav-docs"
-							onclick="openPlaceholder(event, 'docs')"
-							>Docs</a
-						>
-						<a
-							href="#"
-							class="nav-link"
-							id="nav-about"
-							onclick="openPlaceholder(event, 'about')"
+						<a href="#" class="nav-link" id="nav-docs" data-page="docs">Docs</a>
+						<a href="#" class="nav-link" id="nav-about" data-page="about"
 							>About</a
 						>
-						<a
-							href="#"
-							class="nav-link"
-							id="nav-contact"
-							onclick="openPlaceholder(event, 'contact')"
+						<a href="#" class="nav-link" id="nav-contact" data-page="contact"
 							>Contact</a
 						>
 					</nav>
@@ -91,7 +69,7 @@
 								id="signin-header-btn"
 								type="button"
 								class="nav-text-btn"
-								onclick="openAuth('login')"
+								data-action="login"
 							>
 								Login
 							</button>
@@ -99,7 +77,7 @@
 								id="register-header-btn"
 								type="button"
 								class="btn-join"
-								onclick="openAuth('register')"
+								data-action="register"
 							>
 								Join now
 							</button>
@@ -112,7 +90,7 @@
 								class="user-menu-btn"
 								aria-haspopup="true"
 								aria-expanded="false"
-								onclick="toggleUserMenu(event)"
+								data-action="toggle-user-menu"
 							>
 								<span id="user-avatar" class="user-avatar" aria-hidden="true"
 									>CR</span
@@ -145,10 +123,7 @@
 									type="button"
 									class="menu-item"
 									role="menuitem"
-									onclick="
-										openApp()
-										closeUserMenu()
-									"
+									data-action="open-app"
 								>
 									Open range
 								</button>
@@ -156,7 +131,7 @@
 									type="button"
 									class="menu-item menu-item-danger"
 									role="menuitem"
-									onclick="logout()"
+									data-action="logout"
 								>
 									Logout
 								</button>
@@ -223,27 +198,27 @@
 									d="M400 400 L400 120 A280 280 0 0 1 620 220 Z"
 									fill="url(#sweep)"
 								/>
-								<circle cx="400" cy="400" r="8" fill="#ff2a1f" />
+								<circle cx="400" cy="400" r="8" fill="#818cf8" />
 								<circle
 									class="blip blip-a"
 									cx="520"
 									cy="280"
 									r="5"
-									fill="#ff2a1f"
+									fill="#818cf8"
 								/>
 								<circle
 									class="blip blip-b"
 									cx="310"
 									cy="510"
 									r="4"
-									fill="#ff5c5c"
+									fill="#67e8f9"
 								/>
 								<circle
 									class="blip blip-c"
 									cx="560"
 									cy="480"
 									r="3.5"
-									fill="#ff8a80"
+									fill="#a5f3fc"
 								/>
 								<defs>
 									<radialGradient
@@ -255,17 +230,17 @@
 									>
 										<stop
 											offset="0%"
-											stop-color="#ff2a1f"
+											stop-color="#818cf8"
 											stop-opacity="0.35"
 										/>
-										<stop offset="100%" stop-color="#ff2a1f" stop-opacity="0" />
+										<stop offset="100%" stop-color="#818cf8" stop-opacity="0" />
 									</radialGradient>
 								</defs>
 							</svg>
 						</div>
 						<div class="hero-copy">
 							<p class="hero-brand">CyberRange</p>
-							<h1 class="hero-title">
+							<h1 class="hero-title gradient-text">
 								Practical cyber training for real teams.
 							</h1>
 							<p class="hero-lead">
@@ -276,6 +251,31 @@
 								<span aria-hidden="true">●</span> Isolated environments.
 								Team-based learning. ATT&amp;CK-aligned.
 							</p>
+							<div id="hero-guest-actions" class="hero-actions">
+								<button
+									type="button"
+									class="btn btn-primary"
+									data-action="register"
+								>
+									Start training
+								</button>
+								<button
+									type="button"
+									class="btn btn-secondary"
+									data-action="login"
+								>
+									Sign in
+								</button>
+							</div>
+							<div id="hero-user-actions" class="hero-actions hidden">
+								<button
+									type="button"
+									class="btn btn-primary"
+									data-action="range"
+								>
+									Open your range
+								</button>
+							</div>
 						</div>
 					</div>
 
@@ -333,7 +333,7 @@
 				<!-- DASHBOARD -->
 				<section
 					id="dashboard-screen"
-					class="screen hidden"
+					class="screen range-screen hidden"
 					aria-labelledby="dash-title"
 				>
 					<p class="panel-kicker">Team operations</p>
@@ -346,7 +346,7 @@
 					<div id="create-join-section">
 						<div class="surface">
 							<h3 class="surface-title">Create a team</h3>
-							<div class="field" style="margin-bottom: 0.75rem">
+							<div class="field mb-3">
 								<label for="team-name">Team name</label>
 								<input
 									type="text"
@@ -359,7 +359,7 @@
 							<button
 								type="button"
 								id="create-team-btn"
-								onclick="createTeam()"
+								data-action="create-team"
 								class="btn btn-primary"
 								data-label="Create team"
 							>
@@ -369,9 +369,9 @@
 
 						<div class="divider">Or</div>
 
-						<div class="surface" style="margin-bottom: 0">
+						<div class="surface mb-0">
 							<h3 class="surface-title">Join a team</h3>
-							<div class="field" style="margin-bottom: 0.75rem">
+							<div class="field mb-3">
 								<label for="join-team-id">Invite code</label>
 								<input
 									type="text"
@@ -386,7 +386,7 @@
 							<button
 								type="button"
 								id="join-team-btn"
-								onclick="joinTeam()"
+								data-action="join-team"
 								class="btn btn-secondary"
 								data-label="Join team"
 							>
@@ -396,9 +396,9 @@
 					</div>
 
 					<div id="invite-section" class="hidden">
-						<div id="invite-code-box" class="surface">
+						<div id="invite-code-box" class="surface invite-widget">
 							<label for="invite-code">Team invite code</label>
-							<p class="field-hint" style="margin: 0 0 0.65rem">
+							<p class="field-hint mb-3">
 								Share this with attackers so they can join your squad.
 							</p>
 							<div class="row">
@@ -412,9 +412,31 @@
 								<button
 									type="button"
 									id="copy-btn"
-									onclick="copyInvite()"
+									data-action="copy-invite"
 									class="btn btn-secondary btn-compact"
 								>
+									<svg
+										viewBox="0 0 16 16"
+										width="14"
+										height="14"
+										fill="none"
+										aria-hidden="true"
+									>
+										<rect
+											x="5"
+											y="5"
+											width="9"
+											height="9"
+											rx="1.5"
+											stroke="currentColor"
+											stroke-width="1.4"
+										/>
+										<path
+											d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"
+											stroke="currentColor"
+											stroke-width="1.4"
+										/>
+									</svg>
 									Copy
 								</button>
 							</div>
@@ -430,7 +452,7 @@
 						<button
 							type="button"
 							id="start-game-btn"
-							onclick="showScreen('game-screen')"
+							data-action="proceed"
 							class="hidden btn btn-primary"
 						>
 							Proceed to scenario
@@ -448,7 +470,7 @@
 							type="button"
 							id="refresh-btn"
 							class="hidden btn btn-secondary"
-							onclick="checkGameStatus()"
+							data-action="check-status"
 							data-label="Check status now"
 						>
 							Check status now
@@ -499,26 +521,24 @@
 				<!-- GAME -->
 				<section
 					id="game-screen"
-					class="screen hidden"
+					class="screen range-screen hidden"
 					aria-labelledby="game-title"
 				>
-					<div class="scenario-head">
+					<div class="scenario-head surface">
 						<div>
-							<p class="panel-kicker">Live scenario</p>
+							<p class="panel-kicker">Threat intelligence · live scenario</p>
 							<h2 id="game-title" class="panel-title">Beginner Linux Recon</h2>
-							<p class="panel-sub" style="margin-bottom: 0">
-								T1046 — Network Service Discovery
-							</p>
+							<p class="panel-sub mb-0">Network Service Discovery</p>
+							<span class="technique-tag">MITRE ATT&amp;CK · T1046</span>
 						</div>
-						<span class="diff-badge">Easy</span>
+						<span class="diff-badge severity-badge">LOW SEVERITY</span>
 					</div>
 
 					<button
 						type="button"
 						id="deploy-btn"
-						onclick="startSession()"
-						class="btn btn-primary"
-						style="margin-bottom: 1.15rem"
+						data-action="start-session"
+						class="btn btn-primary mb-5"
 						data-label="Deploy container"
 					>
 						Deploy container
@@ -528,26 +548,29 @@
 						<div id="env-live-status" class="live-status">
 							<span
 								id="env-live-dot"
-								class="dot is-live"
+								class="dot is-live pulse-glow"
 								aria-hidden="true"
 							></span>
 							<span id="env-live-label">Environment live</span>
 						</div>
-						<div class="field" style="margin-bottom: 0">
+						<div class="field mb-0">
 							<label for="flag-input">Submit flag</label>
-							<div class="row">
+							<div class="row flag-prompt">
+								<span class="flag-prompt-prefix" aria-hidden="true"
+									>CR&gt;</span
+								>
 								<input
 									type="text"
 									id="flag-input"
 									class="input input-mono"
-									placeholder="FLAG{...}"
+									placeholder="CR{...}"
 									autocomplete="off"
 									spellcheck="false"
 								/>
 								<button
 									type="button"
 									id="flag-submit-btn"
-									onclick="submitFlag()"
+									data-action="submit-flag"
 									class="btn btn-success btn-compact"
 									data-label="Submit"
 								>
@@ -557,6 +580,59 @@
 							<p class="field-hint">
 								Flags are case-sensitive. Keep probing the target.
 							</p>
+						</div>
+					</div>
+					<div class="terminal" aria-label="Target terminal">
+						<div class="terminal-titlebar">
+							<span
+								class="terminal-window-dot terminal-window-dot-red"
+								aria-hidden="true"
+							></span>
+							<span
+								class="terminal-window-dot terminal-window-dot-amber"
+								aria-hidden="true"
+							></span>
+							<span
+								class="terminal-window-dot terminal-window-dot-green"
+								aria-hidden="true"
+							></span>
+							<span class="terminal-label">target-shell · bash</span>
+						</div>
+						<div class="terminal-hint">
+							<strong>Recon hints</strong>
+							<span
+								>Try <code>pwd</code>, then <code>ls -la</code>. Search files
+								with <code>find / -type f 2&gt;/dev/null</code>, inspect
+								candidates with <code>cat /path/to/file</code>, or search text
+								with <code>grep -R "CR{" / 2&gt;/dev/null</code>.</span
+							>
+						</div>
+						<div
+							id="terminal-output"
+							class="terminal-output"
+							role="log"
+							aria-live="polite"
+						></div>
+						<div class="terminal-prompt">
+							<span aria-hidden="true">$</span>
+							<input
+								id="terminal-input"
+								class="terminal-input"
+								type="text"
+								placeholder="Deploy the container first"
+								autocomplete="off"
+								spellcheck="false"
+								disabled
+							/>
+							<button
+								type="button"
+								id="terminal-run-btn"
+								class="btn btn-secondary btn-compact"
+								data-action="run-terminal"
+								disabled
+							>
+								Run
+							</button>
 						</div>
 					</div>
 					<div id="game-msg" class="msg" role="status" aria-live="polite"></div>
@@ -572,68 +648,93 @@
 			aria-modal="true"
 			aria-labelledby="auth-title"
 		>
-			<div class="modal-backdrop" onclick="closeAuth()"></div>
-			<div class="modal-panel screen">
-				<button
-					type="button"
-					class="modal-close"
-					onclick="closeAuth()"
-					aria-label="Close"
-				>
-					×
-				</button>
-				<p class="panel-kicker" id="auth-kicker">Operator access</p>
-				<h2 id="auth-title" class="panel-title">Sign in</h2>
-				<p class="panel-sub" id="auth-sub">
-					Access your team workspace and live scenarios.
-				</p>
-
-				<form id="auth-form" onsubmit="return handleAuthSubmit(event)">
-					<div class="field">
-						<label for="email">Email</label>
-						<input
-							type="email"
-							id="email"
-							class="input"
-							placeholder="operator@company.com"
-							autocomplete="username"
-							required
-						/>
-					</div>
-					<div class="field">
-						<label for="password">Password</label>
-						<input
-							type="password"
-							id="password"
-							class="input"
-							placeholder="••••••••"
-							autocomplete="current-password"
-							required
-							minlength="6"
-						/>
-					</div>
-					<button
-						type="submit"
-						id="auth-submit-btn"
-						class="btn btn-primary"
-						data-label="Sign in"
-					>
-						Sign in
-					</button>
-				</form>
-
-				<div class="auth-footer">
+			<div class="modal-backdrop" data-action="close-auth"></div>
+			<div class="modal-panel screen auth-layout">
+				<section class="auth-hero" aria-label="CyberRange platform">
+					<p class="panel-kicker">CyberRange for enterprise</p>
+					<h2 class="auth-hero-title gradient-text">
+						Train Your Team. Defend Your Network.
+					</h2>
+					<p class="panel-sub">
+						The only team-based Cyber Range built for modern enterprises. Deploy
+						realistic scenarios mapped to the MITRE ATT&amp;CK framework.
+					</p>
+					<ul class="auth-hero-list">
+						<li>Team-Based Scenarios</li>
+						<li>Live Docker Environments</li>
+						<li>MITRE ATT&amp;CK Mapped</li>
+					</ul>
+				</section>
+				<section class="auth-form-panel">
 					<button
 						type="button"
-						class="link-btn"
-						id="auth-switch-btn"
-						onclick="toggleAuthMode()"
+						class="modal-close"
+						data-action="close-auth"
+						aria-label="Close"
 					>
-						New here? <span>Create an account</span>
+						×
 					</button>
-				</div>
-				<div id="auth-msg" class="msg" role="status" aria-live="polite"></div>
+					<p class="panel-kicker" id="auth-kicker">Operator access</p>
+					<h2 id="auth-title" class="panel-title">Sign in</h2>
+					<p class="panel-sub" id="auth-sub">
+						Access your team workspace and live scenarios.
+					</p>
+
+					<form id="auth-form">
+						<div class="field">
+							<label for="email">Email</label>
+							<input
+								type="email"
+								id="email"
+								class="input"
+								placeholder="operator@company.com"
+								autocomplete="username"
+								required
+							/>
+						</div>
+						<div class="field">
+							<label for="password">Password</label>
+							<input
+								type="password"
+								id="password"
+								class="input"
+								placeholder="••••••••"
+								autocomplete="current-password"
+								required
+								minlength="6"
+							/>
+						</div>
+						<button
+							type="submit"
+							id="auth-submit-btn"
+							class="btn btn-primary"
+							data-label="Sign in"
+						>
+							Sign in
+						</button>
+					</form>
+
+					<div class="auth-footer">
+						<button
+							type="button"
+							class="link-btn"
+							id="auth-switch-btn"
+							data-action="toggle-auth-mode"
+						>
+							New here? <span>Create an account</span>
+						</button>
+					</div>
+					<div id="auth-msg" class="msg" role="status" aria-live="polite"></div>
+				</section>
 			</div>
 		</div>
+		<script src="js/utils.js"></script>
+		<script src="js/api.js"></script>
+		<script src="js/auth.js"></script>
+		<script src="js/team.js"></script>
+		<script src="js/poll.js"></script>
+		<script src="js/session.js"></script>
+		<script src="js/ui.js"></script>
+		<script src="js/app.js"></script>
 	</body>
 </html>
