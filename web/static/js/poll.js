@@ -1,14 +1,12 @@
 let pollIntervalId = null
 let currentGamePhase = "lobby"
 
-/** Starts lobby polling at the requested interval. */
-function startPolling(intervalMs = POLL_INTERVAL) {
+/** No-op kept for compatibility — auto-polling is disabled. */
+function startPolling() {
 	stopPolling()
-	if (currentGamePhase !== "lobby" || !teamId) return
-	pollIntervalId = setInterval(pollForUpdates, intervalMs)
 }
 
-/** Stops the active lobby polling interval. */
+/** Stops any leftover lobby polling interval. */
 function stopPolling() {
 	if (pollIntervalId !== null) {
 		clearInterval(pollIntervalId)
@@ -32,40 +30,21 @@ async function checkGameStatus() {
 	if (session.status === "completed") {
 		sessionId = session.session_id || sessionId
 		containerId = session.container_id || containerId
-		showWinState("A teammate captured the flag. Challenge complete.")
+		applyScenarioInfo(session)
+		await showVictoryFromPayload(session)
 		return
 	}
 	if (session.session_id && session.status === "running") {
 		containerId = session.container_id || containerId
+		applyScenarioInfo(session)
 		enterLiveGame(session.session_id)
 		return
 	}
 
-	setMessage(
-		msg,
-		"Scenario not started yet. Hang tight — the captain will deploy the container.",
-		"info",
-	)
+	setMessage(msg, "Captain hasn't started yet", "info")
 }
 
-/** Poll for updates. */
+/** Legacy helper — members must use Check Status Now instead. */
 async function pollForUpdates() {
-	if (!teamId || currentGamePhase !== "lobby") return
-
-	await refreshMembers()
-	const session = await apiCall(
-		`/api/sessions/active?team_id=${teamId}&t=${Date.now()}`,
-		null,
-		"GET",
-	)
-	if (session.status === "completed") {
-		sessionId = session.session_id || sessionId
-		containerId = session.container_id || containerId
-		showWinState("A teammate captured the flag. Challenge complete.")
-		return
-	}
-	if (session.session_id && session.status === "running") {
-		containerId = session.container_id || containerId
-		enterLiveGame(session.session_id)
-	}
+	return
 }

@@ -23,30 +23,27 @@ func resolveContainerImage(imageName string) string {
 func StartContainer(imageName string) (string, error) {
 	imageName = resolveContainerImage(imageName)
 
-	// 1. Connect to the local Docker Engine (Docker Desktop)
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
 		return "", fmt.Errorf("failed to connect to Docker: %v", err)
 	}
 	defer cli.Close()
 
-	// 2. Create the container (but don't start it yet)
-	resp, err := cli.ContainerCreate(context.Background(), 
+	resp, err := cli.ContainerCreate(context.Background(),
 		&container.Config{
 			Image: imageName,
-			Cmd:   []string{"sleep", "300"}, // Keeps the container alive for 5 minutes for testing
+			Cmd:   []string{"sleep", "3600"},
 			Tty:   false,
 		},
-		nil, // HostConfig (networking, ports etc - we keep it simple for now)
-		nil, // NetworkingConfig
-		nil, // Platform
-		"",  // Container name (leave blank to auto-generate)
+		nil,
+		nil,
+		nil,
+		"",
 	)
 	if err != nil {
 		return "", fmt.Errorf("failed to create container: %v", err)
 	}
 
-	// 3. Start the container
 	if err := cli.ContainerStart(context.Background(), resp.ID, container.StartOptions{}); err != nil {
 		return "", fmt.Errorf("failed to start container: %v", err)
 	}
@@ -55,15 +52,34 @@ func StartContainer(imageName string) (string, error) {
 }
 
 func StopContainer(containerID string) error {
-    cli, err := client.NewClientWithOpts(client.FromEnv)
-    if err != nil {
-        return fmt.Errorf("failed to connect to Docker: %v", err)
-    }
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return fmt.Errorf("failed to connect to Docker: %v", err)
+	}
+	defer cli.Close()
 
-    timeout := 5
-    stopOpts := container.StopOptions{Timeout: &timeout}
-    if err := cli.ContainerStop(context.Background(), containerID, stopOpts); err != nil {
-        return fmt.Errorf("failed to stop container: %v", err)
-    }
-    return nil
+	timeout := 5
+	stopOpts := container.StopOptions{Timeout: &timeout}
+	if err := cli.ContainerStop(context.Background(), containerID, stopOpts); err != nil {
+		return fmt.Errorf("failed to stop container: %v", err)
+	}
+	return nil
+}
+
+// StopAndRemoveContainer stops then removes a container.
+func StopAndRemoveContainer(containerID string) error {
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return fmt.Errorf("failed to connect to Docker: %v", err)
+	}
+	defer cli.Close()
+
+	timeout := 5
+	stopOpts := container.StopOptions{Timeout: &timeout}
+	_ = cli.ContainerStop(context.Background(), containerID, stopOpts)
+
+	if err := cli.ContainerRemove(context.Background(), containerID, container.RemoveOptions{Force: true}); err != nil {
+		return fmt.Errorf("failed to remove container: %v", err)
+	}
+	return nil
 }

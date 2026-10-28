@@ -5,7 +5,8 @@ INSERT INTO scenarios (
 	attack_tactic,
 	attack_technique_id,
 	docker_image,
-	flag
+	flag,
+	difficulty
 )
 VALUES
 	(
@@ -15,7 +16,8 @@ VALUES
 		'Credential Access',
 		'T1078',
 		'alpine',
-		'CR{ssh_master}'
+		'CR{ssh_master}',
+		'easy'
 	),
 	(
 		'660e8400-e29b-41d4-a716-446655440000',
@@ -24,7 +26,8 @@ VALUES
 		'Defense Evasion',
 		'T1083',
 		'httpd',
-		'CR{path_master}'
+		'CR{path_master}',
+		'medium'
 	),
 	(
 		'440e8400-e29b-41d4-a716-446655440000',
@@ -33,7 +36,18 @@ VALUES
 		'Persistence',
 		'T1505.003',
 		'nginx',
-		'CR{webshell_king}'
+		'CR{webshell_king}',
+		'hard'
+	),
+	(
+		'770e8400-e29b-41d4-a716-446655440000',
+		'Beginner Linux Recon',
+		'Explore a Linux container, locate the hidden flag file, and submit it.',
+		'Discovery',
+		'T1083',
+		'alpine',
+		'CR{recon_starter}',
+		'easy'
 	)
 ON CONFLICT (id) DO UPDATE SET
 	name = EXCLUDED.name,
@@ -41,4 +55,5 @@ ON CONFLICT (id) DO UPDATE SET
 	attack_tactic = EXCLUDED.attack_tactic,
 	attack_technique_id = EXCLUDED.attack_technique_id,
 	docker_image = EXCLUDED.docker_image,
-	flag = EXCLUDED.flag;
+	flag = EXCLUDED.flag,
+	difficulty = EXCLUDED.difficulty;

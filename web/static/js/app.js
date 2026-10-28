@@ -89,6 +89,18 @@ document.addEventListener("DOMContentLoaded", () => {
 				case "run-terminal":
 					runTerminalCommand()
 					break
+				case "end-scenario":
+					endScenario()
+					break
+				case "play-again":
+					playAgain()
+					break
+				case "leave-team":
+					leaveTeam()
+					break
+				case "stay-team":
+					stayInTeam()
+					break
 				case "close-auth":
 					closeAuth()
 					break

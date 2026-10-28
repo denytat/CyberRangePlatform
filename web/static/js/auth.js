@@ -108,33 +108,16 @@ function handleAuthSubmit(event) {
 function logout() {
 	userId = ""
 	userEmail = ""
-	teamId = ""
-	myRole = ""
-	sessionId = ""
-	containerId = ""
-	terminalSocket?.close()
-	terminalSocket = null
-	gameEnded = false
-	inGame = false
-	currentGamePhase = "lobby"
-	stopPolling()
+	clearTeamState()
+	resetGameState()
+	clearSessionCookie()
 	closeAuth()
 	closeUserMenu()
+	hideVictoryModal()
+	hideStayTeamModal()
 
-	document.getElementById("invite-section").classList.add("hidden")
-	document.getElementById("create-join-section").classList.remove("hidden")
-	document.getElementById("active-session").classList.add("hidden")
-	document.getElementById("active-session").classList.remove("is-complete")
-	updateDeployButton()
-	document.getElementById("flag-input").disabled = false
-	document.getElementById("flag-input").value = ""
-	document.getElementById("flag-submit-btn").disabled = false
-
-	const dot = document.getElementById("env-live-dot")
-	dot.classList.add("is-live")
-	dot.classList.remove("is-done")
-	document.getElementById("env-live-status").classList.remove("is-done")
-	document.getElementById("env-live-label").innerText = "Environment live"
+	document.getElementById("invite-section")?.classList.add("hidden")
+	document.getElementById("create-join-section")?.classList.remove("hidden")
 
 	setMessage(document.getElementById("auth-msg"), "", "")
 	setMessage(document.getElementById("team-msg"), "", "")
@@ -192,7 +175,9 @@ async function login() {
 		setMessage(msg, "", "")
 		closeAuth()
 		saveSessionCookie()
+		restoreTeamState()
 		showScreen("dashboard-screen")
+		await setupTeamUI()
 	} else {
 		setMessage(msg, data.error || "Invalid credentials", "error")
 	}

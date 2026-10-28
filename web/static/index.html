@@ -338,7 +338,7 @@
 				>
 					<p class="panel-kicker">Team operations</p>
 					<h2 id="dash-title" class="panel-title">Assemble your squad</h2>
-					<p class="panel-sub">
+					<p id="dash-sub" class="panel-sub">
 						Captains create a team and share the invite code. Attackers join and
 						wait for deployment.
 					</p>
@@ -396,6 +396,11 @@
 					</div>
 
 					<div id="invite-section" class="hidden">
+						<h2 id="team-heading" class="panel-title team-heading"></h2>
+						<p id="member-role-banner" class="member-role-banner hidden">
+							You are a member of this team
+						</p>
+
 						<div id="invite-code-box" class="surface invite-widget">
 							<label for="invite-code">Team invite code</label>
 							<p class="field-hint mb-3">
@@ -446,7 +451,18 @@
 						<h3 class="surface-title">Active members</h3>
 						<ul id="member-list" class="member-list"></ul>
 						<div id="members-empty" class="empty-state hidden">
-							No members loaded yet. Status refreshes automatically.
+							No members loaded yet. Click refresh or invite teammates.
+						</div>
+
+						<div id="scenario-selector" class="scenario-selector hidden">
+							<div class="scenario-selector-head">
+								<span class="scenario-selector-icon" aria-hidden="true">◈</span>
+								<h3 class="surface-title mb-0">Select scenario</h3>
+							</div>
+							<div id="scenario-grid" class="scenario-grid"></div>
+							<p id="scenario-empty" class="empty-state hidden">
+								No scenarios available yet.
+							</p>
 						</div>
 
 						<button
@@ -454,16 +470,15 @@
 							id="start-game-btn"
 							data-action="proceed"
 							class="hidden btn btn-primary"
+							data-label="Proceed to scenario"
+							disabled
 						>
 							Proceed to scenario
 						</button>
 
 						<div id="wait-msg" class="hidden wait-banner" role="status">
 							<span class="pulse" aria-hidden="true"></span>
-							<span
-								>Waiting for the team captain to start the scenario. This page
-								updates automatically.</span
-							>
+							<span>Waiting for the captain to start the scenario.</span>
 						</div>
 
 						<button
@@ -472,6 +487,7 @@
 							class="hidden btn btn-secondary"
 							data-action="check-status"
 							data-label="Check status now"
+							data-spinner="true"
 						>
 							Check status now
 						</button>
@@ -524,35 +540,76 @@
 					class="screen range-screen hidden"
 					aria-labelledby="game-title"
 				>
+					<div class="game-toolbar">
+						<button
+							type="button"
+							id="end-scenario-btn"
+							data-action="end-scenario"
+							class="btn btn-danger-outline btn-compact"
+							data-label="End scenario"
+						>
+							End scenario
+						</button>
+					</div>
+
 					<div class="scenario-head surface">
 						<div>
 							<p class="panel-kicker">Threat intelligence · live scenario</p>
-							<h2 id="game-title" class="panel-title">Beginner Linux Recon</h2>
-							<p class="panel-sub mb-0">Network Service Discovery</p>
-							<span class="technique-tag">MITRE ATT&amp;CK · T1046</span>
+							<h2 id="game-title" class="panel-title">Scenario</h2>
+							<p id="game-desc" class="panel-sub mb-0">Select a scenario to begin.</p>
+							<span id="game-technique" class="technique-tag">MITRE ATT&amp;CK</span>
 						</div>
-						<span class="diff-badge severity-badge">LOW SEVERITY</span>
+						<div class="scenario-head-meta">
+							<span id="game-diff-badge" class="diff-badge">—</span>
+							<div id="env-live-status" class="live-status env-status-inline">
+								<span
+									id="env-live-dot"
+									class="dot is-live pulse-glow"
+									aria-hidden="true"
+								></span>
+								<span id="env-live-label">Environment live</span>
+							</div>
+						</div>
 					</div>
 
 					<button
 						type="button"
 						id="deploy-btn"
 						data-action="start-session"
-						class="btn btn-primary mb-5"
+						class="btn btn-primary mb-5 hidden"
 						data-label="Deploy container"
 					>
 						Deploy container
 					</button>
 
+					<div id="mission-briefing" class="mission-briefing surface">
+						<h3 class="mission-briefing-title">🎯 Mission briefing</h3>
+						<p>Your mission: Find the hidden flag and submit it.</p>
+						<p>
+							Flag format: <code>CR{...random_characters...}</code>
+							(example: <code>CR{a1b2c3d4}</code>)
+						</p>
+						<p id="mission-hint">
+							<strong>Flag location hint:</strong>
+							<span id="mission-hint-text"
+								>The flag is stored in a file on this container. Try:
+								<code>cat /flag.txt</code></span
+							>
+						</p>
+						<p><strong>Useful commands:</strong></p>
+						<ul class="mission-commands">
+							<li><code>find / -name "*flag*" 2&gt;/dev/null</code></li>
+							<li><code>grep -r "CR{" / 2&gt;/dev/null</code></li>
+							<li><code>env | grep -i flag</code></li>
+							<li><code>cat /flag.txt /root/flag.txt /tmp/flag.txt</code></li>
+						</ul>
+						<p class="field-hint mb-0">
+							Type <code>cat /etc/motd</code> in the terminal to see instructions
+							again.
+						</p>
+					</div>
+
 					<div id="active-session" class="live-panel hidden">
-						<div id="env-live-status" class="live-status">
-							<span
-								id="env-live-dot"
-								class="dot is-live pulse-glow"
-								aria-hidden="true"
-							></span>
-							<span id="env-live-label">Environment live</span>
-						</div>
 						<div class="field mb-0">
 							<label for="flag-input">Submit flag</label>
 							<div class="row flag-prompt">
@@ -598,15 +655,6 @@
 							></span>
 							<span class="terminal-label">target-shell · bash</span>
 						</div>
-						<div class="terminal-hint">
-							<strong>Recon hints</strong>
-							<span
-								>Try <code>pwd</code>, then <code>ls -la</code>. Search files
-								with <code>find / -type f 2&gt;/dev/null</code>, inspect
-								candidates with <code>cat /path/to/file</code>, or search text
-								with <code>grep -R "CR{" / 2&gt;/dev/null</code>.</span
-							>
-						</div>
 						<div
 							id="terminal-output"
 							class="terminal-output"
@@ -638,6 +686,93 @@
 					<div id="game-msg" class="msg" role="status" aria-live="polite"></div>
 				</section>
 			</main>
+		</div>
+
+		<!-- VICTORY MODAL -->
+		<div
+			id="victory-modal"
+			class="modal hidden"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="victory-title"
+		>
+			<div class="modal-backdrop"></div>
+			<div class="modal-panel victory-panel">
+				<div class="victory-icon" aria-hidden="true">🏆</div>
+				<p class="panel-kicker">Mission success</p>
+				<h2 id="victory-title" class="panel-title">Scenario completed!</h2>
+				<p id="victory-scenario" class="panel-sub"></p>
+				<div class="victory-cards">
+					<div class="victory-card">
+						<p class="victory-card-label">Winner</p>
+						<p id="victory-winner" class="victory-card-value"></p>
+						<p id="victory-winner-role" class="field-hint mb-0"></p>
+						<p class="msg-success mb-0">Found the flag!</p>
+					</div>
+					<div class="victory-card">
+						<p class="victory-card-label">Time</p>
+						<p id="victory-duration" class="victory-card-value"></p>
+						<p id="victory-times" class="field-hint mb-0"></p>
+					</div>
+				</div>
+				<h3 class="surface-title">Team members</h3>
+				<ul id="victory-members" class="member-list"></ul>
+				<div class="victory-actions">
+					<button
+						type="button"
+						class="btn btn-primary"
+						data-action="play-again"
+						data-label="Play again"
+					>
+						Play again
+					</button>
+					<button
+						type="button"
+						class="btn btn-secondary"
+						data-action="leave-team"
+						data-label="Leave team"
+					>
+						Leave team
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- STAY / LEAVE TEAM MODAL -->
+		<div
+			id="stay-team-modal"
+			class="modal hidden"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="stay-team-title"
+		>
+			<div class="modal-backdrop"></div>
+			<div class="modal-panel">
+				<p class="panel-kicker">Scenario ended</p>
+				<h2 id="stay-team-title" class="panel-title">Stay in this team?</h2>
+				<p class="panel-sub">
+					Your progress on this scenario was discarded. Choose whether to keep
+					your squad or return to the lobby.
+				</p>
+				<div class="victory-actions">
+					<button
+						type="button"
+						class="btn btn-primary"
+						data-action="stay-team"
+						data-label="Stay in team"
+					>
+						Stay in team
+					</button>
+					<button
+						type="button"
+						class="btn btn-secondary"
+						data-action="leave-team"
+						data-label="Leave team"
+					>
+						Leave team
+					</button>
+				</div>
+			</div>
 		</div>
 
 		<!-- AUTH MODAL -->

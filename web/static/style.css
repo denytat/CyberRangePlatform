@@ -1633,6 +1633,23 @@ body.modal-open {
 	gap: 1rem;
 }
 
+#create-join-section.hidden,
+#invite-section.hidden,
+#invite-code-box.hidden,
+#scenario-selector.hidden,
+#start-game-btn.hidden,
+#wait-msg.hidden,
+#refresh-btn.hidden,
+#member-role-banner.hidden,
+#deploy-btn.hidden,
+#active-session.hidden,
+#mission-briefing.hidden,
+#members-empty.hidden,
+#member-list.hidden,
+#scenario-empty.hidden {
+	display: none !important;
+}
+
 #create-join-section > .surface {
 	margin-bottom: 0;
 }
@@ -1666,5 +1683,306 @@ body.modal-open {
 		width: auto;
 		height: 1px;
 		min-height: 0;
+	}
+}
+
+/* Team dashboard after join/create */
+.team-heading {
+	margin-bottom: 0.35rem;
+}
+
+.member-role-banner {
+	margin: 0 0 1rem;
+	padding: 0.65rem 0.85rem;
+	border-radius: 0.65rem;
+	border: 1px solid rgba(129, 140, 248, 0.3);
+	background: var(--brand-soft);
+	color: #c7d2fe;
+	font-size: 0.88rem;
+}
+
+.mb-0 {
+	margin-bottom: 0 !important;
+}
+
+/* Scenario selector */
+.scenario-selector {
+	margin: 1.25rem 0 0.5rem;
+	padding: 1rem;
+	border: 1px solid var(--border);
+	border-radius: 0.85rem;
+	background: rgba(15, 23, 42, 0.55);
+}
+
+.scenario-selector-head {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	margin-bottom: 0.85rem;
+}
+
+.scenario-selector-icon {
+	color: var(--brand-bright);
+	font-size: 1.1rem;
+}
+
+.scenario-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+	gap: 0.75rem;
+}
+
+.scenario-card {
+	appearance: none;
+	text-align: left;
+	cursor: pointer;
+	padding: 0.9rem;
+	border-radius: 0.75rem;
+	border: 1px solid var(--border-strong);
+	background: rgba(11, 18, 32, 0.85);
+	color: inherit;
+	transition:
+		border-color 0.15s,
+		box-shadow 0.15s,
+		transform 0.12s;
+}
+
+.scenario-card:hover {
+	border-color: rgba(129, 140, 248, 0.55);
+	transform: translateY(-1px);
+}
+
+.scenario-card.is-selected {
+	border-color: var(--brand-bright);
+	box-shadow:
+		0 0 0 1px rgba(129, 140, 248, 0.45),
+		0 0 22px rgba(99, 102, 241, 0.35);
+}
+
+.scenario-card-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 0.5rem;
+	margin-bottom: 0.4rem;
+}
+
+.scenario-card-name {
+	font-family: var(--font-display);
+	font-size: 1rem;
+	letter-spacing: 0.02em;
+}
+
+.scenario-card-mitre {
+	margin: 0 0 0.45rem;
+	font: 0.72rem var(--font-mono);
+	color: #67e8f9;
+}
+
+.scenario-card-desc {
+	margin: 0;
+	font-size: 0.8rem;
+	line-height: 1.4;
+	color: var(--text-muted);
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.diff-pill,
+.diff-badge.diff-easy,
+.diff-badge.diff-medium,
+.diff-badge.diff-hard,
+.diff-badge.diff-expert {
+	font-family: var(--font-mono);
+	font-size: 0.68rem;
+	letter-spacing: 0.04em;
+	padding: 0.2rem 0.5rem;
+	border-radius: 999px;
+	white-space: nowrap;
+}
+
+.diff-pill,
+.diff-easy {
+	border: 1px solid rgba(52, 211, 153, 0.35);
+	background: rgba(52, 211, 153, 0.12);
+	color: #6ee7b7;
+}
+
+.diff-medium {
+	border: 1px solid rgba(251, 191, 36, 0.35);
+	background: rgba(251, 191, 36, 0.12);
+	color: #fde68a;
+}
+
+.diff-hard {
+	border: 1px solid rgba(251, 113, 133, 0.4);
+	background: rgba(251, 113, 133, 0.12);
+	color: #fda4af;
+}
+
+.diff-expert {
+	border: 1px solid rgba(148, 163, 184, 0.4);
+	background: rgba(148, 163, 184, 0.12);
+	color: #cbd5e1;
+}
+
+/* Game toolbar / end scenario */
+.game-toolbar {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 0.75rem;
+}
+
+.btn-danger-outline {
+	width: auto;
+	color: var(--danger);
+	background: transparent;
+	border: 1px solid rgba(251, 113, 133, 0.55);
+	border-radius: 2px;
+}
+
+.btn-danger-outline:hover:not(:disabled) {
+	background: rgba(251, 113, 133, 0.12);
+	border-color: var(--danger);
+}
+
+.scenario-head-meta {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 0.65rem;
+}
+
+.env-status-inline {
+	margin-bottom: 0;
+	font-size: 0.8rem;
+}
+
+.mission-briefing {
+	margin-bottom: 1.15rem;
+}
+
+.mission-briefing-title {
+	margin: 0 0 0.75rem;
+	font-family: var(--font-display);
+	font-size: 1.15rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.mission-briefing p {
+	margin: 0 0 0.65rem;
+	color: var(--text-muted);
+	font-size: 0.9rem;
+	line-height: 1.45;
+}
+
+.mission-briefing code {
+	font-family: var(--font-mono);
+	font-size: 0.8rem;
+	color: #d8f5df;
+}
+
+.mission-commands {
+	margin: 0 0 0.75rem;
+	padding-left: 1.1rem;
+	color: var(--text-muted);
+}
+
+.mission-commands li {
+	margin-bottom: 0.35rem;
+}
+
+.btn-spinner {
+	display: inline-block;
+	width: 0.85rem;
+	height: 0.85rem;
+	margin-right: 0.45rem;
+	border: 2px solid rgba(255, 255, 255, 0.25);
+	border-top-color: #fff;
+	border-radius: 50%;
+	vertical-align: -0.15rem;
+	animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Victory / stay modals */
+.victory-panel {
+	max-width: 32rem;
+	text-align: center;
+}
+
+.victory-icon {
+	font-size: 2.75rem;
+	line-height: 1;
+	margin-bottom: 0.5rem;
+}
+
+.victory-cards {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+	margin: 1rem 0 1.25rem;
+	text-align: left;
+}
+
+.victory-card {
+	padding: 0.9rem;
+	border-radius: 0.75rem;
+	border: 1px solid var(--border);
+	background: rgba(15, 23, 42, 0.72);
+}
+
+.victory-card-label {
+	margin: 0 0 0.35rem;
+	font-size: 0.72rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--text-dim);
+	font-family: var(--font-display);
+}
+
+.victory-card-value {
+	margin: 0 0 0.25rem;
+	font-family: var(--font-display);
+	font-size: 1.15rem;
+	font-weight: 700;
+}
+
+.victory-actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.65rem;
+	margin-top: 1rem;
+}
+
+.victory-actions .btn {
+	width: 100%;
+}
+
+#victory-members {
+	text-align: left;
+	max-height: 10rem;
+}
+
+@media (max-width: 520px) {
+	.victory-cards,
+	.victory-actions {
+		grid-template-columns: 1fr;
+	}
+
+	.scenario-head {
+		flex-direction: column;
+	}
+
+	.scenario-head-meta {
+		align-items: flex-start;
 	}
 }

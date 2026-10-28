@@ -9,31 +9,33 @@ import (
 )
 
 func main() {
-    // 1. Connect to Database
-    conn := db.Connect()
-    defer conn.Close()
+	conn := db.Connect()
+	defer conn.Close()
 
-    // 2. Initialize Handlers
-    authHandler := &handlers.AuthHandler{Conn: conn}
-    teamHandler := &handlers.TeamHandler{Conn: conn}
-    sessionHandler := &handlers.SessionHandler{Conn: conn}
-    terminalHandler := &handlers.TerminalHandler{}
+	authHandler := &handlers.AuthHandler{Conn: conn}
+	teamHandler := &handlers.TeamHandler{Conn: conn}
+	sessionHandler := &handlers.SessionHandler{Conn: conn}
+	terminalHandler := &handlers.TerminalHandler{}
 
-    // 3. Create Routes
-    mux := http.NewServeMux()
-    mux.Handle("/", http.FileServer(http.Dir("./web/static")))
-    mux.HandleFunc("/ws/terminal", terminalHandler.HandleUpgrade)
-    mux.HandleFunc("POST /api/register", authHandler.Register)
-    mux.HandleFunc("POST /api/login", authHandler.Login)
-    mux.HandleFunc("POST /api/teams/create", teamHandler.CreateTeam)
-    mux.HandleFunc("POST /api/teams/join", teamHandler.JoinTeam)
-    mux.HandleFunc("GET /api/teams/members", teamHandler.GetMembers)
-    mux.HandleFunc("POST /api/sessions/start", sessionHandler.Start)
-    mux.HandleFunc("POST /api/sessions/submit-flag", sessionHandler.SubmitFlag)
-    mux.HandleFunc("GET /api/sessions/active", sessionHandler.GetActiveSession)
-    
+	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(http.Dir("./web/static")))
+	mux.HandleFunc("/ws/terminal", terminalHandler.HandleUpgrade)
 
-    // 4. Start Server
-    log.Println("🚀 CyberRange API running on http://localhost:8080")
-    log.Fatal(http.ListenAndServe(":8080", mux))
+	mux.HandleFunc("POST /api/register", authHandler.Register)
+	mux.HandleFunc("POST /api/login", authHandler.Login)
+
+	mux.HandleFunc("POST /api/teams/create", teamHandler.CreateTeam)
+	mux.HandleFunc("POST /api/teams/join", teamHandler.JoinTeam)
+	mux.HandleFunc("GET /api/teams/members", teamHandler.GetMembers)
+	mux.HandleFunc("POST /api/teams/leave", teamHandler.LeaveTeam)
+
+	mux.HandleFunc("GET /api/scenarios", sessionHandler.GetScenarios)
+	mux.HandleFunc("POST /api/sessions/start", sessionHandler.Start)
+	mux.HandleFunc("POST /api/sessions/submit-flag", sessionHandler.SubmitFlag)
+	mux.HandleFunc("GET /api/sessions/active", sessionHandler.GetActiveSession)
+	mux.HandleFunc("POST /api/sessions/end", sessionHandler.End)
+	mux.HandleFunc("GET /api/sessions/result", sessionHandler.GetResult)
+
+	log.Println("🚀 CyberRange API running on http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", mux))
 }

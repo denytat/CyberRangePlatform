@@ -131,6 +131,7 @@ function openTeamsFromNav(event) {
 		setupTeamUI()
 	} else {
 		showScreen("dashboard-screen")
+		setupTeamUI()
 	}
 }
 
@@ -183,7 +184,7 @@ function showScreen(screenId) {
 	updateHeader()
 }
 
-/** Restore from cookie. */
+/** Restore from cookie + localStorage team flags. */
 function restoreFromCookie() {
 	const data = readSessionCookie()
 	if (!data || !data.user_id) {
@@ -193,14 +194,19 @@ function restoreFromCookie() {
 
 	userId = data.user_id
 	userEmail = data.email || ""
-	teamId = ""
-	myRole = ""
 	sessionId = ""
 	inGame = false
 	gameEnded = false
-	scenarioId = "550e8400-e29b-41d4-a716-446655440000"
+	scenarioId = ""
+	selectedScenarioId = ""
 
+	const hasTeam = restoreTeamState()
 	showScreen("dashboard-screen")
+	if (hasTeam) {
+		setupTeamUI()
+	} else {
+		setupTeamUI()
+	}
 }
 
 /** Show home. */
@@ -227,14 +233,9 @@ function openApp() {
 		openAuth("login")
 		return
 	}
-	if (inGame || gameEnded) {
+	if (inGame && !gameEnded) {
 		showScreen("game-screen")
-		if (gameEnded) {
-			document.getElementById("active-session").classList.remove("hidden")
-			document.getElementById("active-session").classList.add("is-complete")
-			document.getElementById("flag-input").disabled = true
-			document.getElementById("flag-submit-btn").disabled = true
-		} else if (sessionId) {
+		if (sessionId) {
 			document.getElementById("active-session").classList.remove("hidden")
 		}
 		updateDeployButton()
@@ -245,10 +246,11 @@ function openApp() {
 		return
 	}
 	showScreen("dashboard-screen")
+	setupTeamUI()
 }
 
-/** Proceed to scenario. */
-function proceedToScenario() {
+/** Proceed / deploy selected scenario (captain). */
+async function proceedToScenario() {
 	if (!teamId) {
 		setMessage(
 			document.getElementById("team-msg"),
@@ -265,6 +267,13 @@ function proceedToScenario() {
 		)
 		return
 	}
-	showScreen("game-screen")
-	updateDeployButton()
+	if (!selectedScenarioId) {
+		setMessage(
+			document.getElementById("team-msg"),
+			"Select a scenario first.",
+			"error",
+		)
+		return
+	}
+	await startSession()
 }
